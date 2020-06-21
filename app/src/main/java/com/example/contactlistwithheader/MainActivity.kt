@@ -1,7 +1,6 @@
 package com.example.contactlistwithheader
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,13 +20,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         retrieveData()
+        initView()
+        setupIndexing()
+        setupFastScroll()
     }
 
     private fun retrieveData() {
         val jsonFileString = getJsonDataFromAsset(applicationContext, "data.json")
         val gson = Gson()
         val listPersonType = object : TypeToken<List<Contact>>() {}.type
-
         val persons: List<Contact> = gson.fromJson(jsonFileString, listPersonType)
         persons.forEachIndexed { _, person ->
             contactList.add(person)
@@ -43,26 +44,39 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
-
         items.sortBy { it["firstName"] }
-        initList(items)
     }
 
-    private fun initList(itemData: ArrayList<HashMap<String, String>>) {
+    private fun initView() {
         // Create vertical Layout Manager
-        val rv = findViewById<RecyclerView>(R.id.contactsList)
-        rv.layoutManager = LinearLayoutManager(
-            this,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        rv_contactsList.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = ContactsAdapter(items)
+        }
+    }
 
-        // Access RecyclerView Adapter and load the data
-        val adapter =
-            ContactsAdapter(itemData)
-        rv.adapter = adapter
+    private fun setupIndexing() {
+        val byInitialName = items.groupBy { it["initialName"] }
+        val initialNameList = byInitialName.values.toTypedArray()
+        val a: MutableList<String> = mutableListOf()
 
-        rv.layoutManager = object :
+        initialNameList.forEachIndexed { index, list ->
+            a.add(initialNameList[index][0]["initialName"].toString())
+        }
+
+        indexing.setAlphabet(a)
+
+        indexing.onSectionIndexClickListener { i: Int, _: String ->
+
+            (rv_contactsList!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
+                i,
+                0
+            )
+        }
+    }
+
+    private fun setupFastScroll() {
+        rv_contactsList.layoutManager = object :
             LinearLayoutManager(this, VERTICAL, false) {
             override fun onLayoutCompleted(state: RecyclerView.State) {
                 super.onLayoutCompleted(state)
@@ -71,36 +85,15 @@ class MainActivity : AppCompatActivity() {
                 val itemsShown = lastVisibleItemPosition - firstVisibleItemPosition + 1
                 //if all items are shown, hide the fast-scroller
                 fastScroll.visibility =
-                    if (adapter.itemCount > itemsShown) View.VISIBLE else View.GONE
+                    if (rv_contactsList.adapter!!.itemCount > itemsShown) View.VISIBLE else View.GONE
             }
         }
-
-        indexing.onSectionIndexClickListener { i: Int, s: String ->
-
-            (rv!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
-                i,
-                0
-            )
-        }
-
-        //String[] alphabet = {"A", "Y", "Z", "#"};
-        //alphabetik.setAlphabet(alphabet);
-        //alphabetik.setAlphabet(String customAlphabet[]);
-        indexing.onSectionIndexClickListener { i: Int, s: String ->
-            (rv!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
-                i,
-                0
-            )
-        }
-
         fastScroll.setRecyclerView(indexing)
         fastScroll.setViewsToUse(
             R.layout.recycler_view_fast_scroller__fast_scroller,
             R.id.fastscroller_bubble,
             R.id.fastscroller_handle
         )
-
-        Log.d("qsdqsd", "qsdqsd" + fastScroll.getTargetPostion())
     }
 
 }

@@ -19,6 +19,8 @@ import com.example.contactlistwithheader.R;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by ricardo.montesinos on 6/22/17.
@@ -27,6 +29,7 @@ import java.util.Arrays;
 public class IndexingList extends RecyclerView {
 
     private static int itemsColor;
+    private List<String> alpha;
     //Default Alphabet
     private String[] alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
             "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"};
@@ -55,7 +58,7 @@ public class IndexingList extends RecyclerView {
         //Custom sizes
         width = ta.getDimensionPixelSize(R.styleable.IndexingList_width, 15);
 
-        int defaultSize = (int) spToPixel(context, 12);
+        int defaultSize = (int) spToPixel(context, 14);
         int attFontSizeValue = ta.getDimensionPixelSize(R.styleable.IndexingList_fontSize, defaultSize);
         fontSize = pixelsToSp(context, attFontSizeValue);
 
@@ -98,7 +101,7 @@ public class IndexingList extends RecyclerView {
     }
 
     private void initRecyclerView() {
-        adapter = new SectionIndexAdapter(alphabet, getContext());
+        adapter = new SectionIndexAdapter(alpha, getContext());
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         this.setHasFixedSize(true);
         this.setAdapter(adapter);
@@ -116,6 +119,7 @@ public class IndexingList extends RecyclerView {
         this.alphabet = alphabet;
         initRecyclerView();
     }
+
 
     //LISTENER
     public void onSectionIndexClickListener(SectionIndexClickListener sectionIndexClickListener) {
@@ -147,7 +151,11 @@ public class IndexingList extends RecyclerView {
         }
         adapter.setBoldPosition(index);
         this.linearLayoutManager.scrollToPositionWithOffset(index, 0);
-        this.getAdapter().notifyDataSetChanged();
+        Objects.requireNonNull(this.getAdapter()).notifyDataSetChanged();
+    }
+
+    public void setAlphabet(@NotNull List<String> a) {
+        alpha = a;
     }
 
     //INTERFACES
@@ -159,11 +167,11 @@ public class IndexingList extends RecyclerView {
     class SectionIndexAdapter extends Adapter<SectionIndexAdapter.ViewHolder> implements RecyclerViewFastScroller.BubbleTextGetter {
 
         private int boldPosition = 0;
-        private String[] alphabet;
+        private List<String> alphabet;
         private LayoutInflater mInflater;
         private SectionIndexClickListener sectionIndexClickListener;
 
-        SectionIndexAdapter(String[] alphabet, Context context) {
+        SectionIndexAdapter(List<String> alphabet, Context context) {
             this.alphabet = alphabet;
             this.mInflater = LayoutInflater.from(context);
         }
@@ -177,15 +185,16 @@ public class IndexingList extends RecyclerView {
             this.boldPosition = position;
         }
 
+        @NotNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
             View view = mInflater.inflate(R.layout.item_letter, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            String letter = alphabet[position];
+            String letter = alpha.get(position);
             holder.tvLetter.setText(letter);
 
             //Set current position to bold
@@ -204,15 +213,15 @@ public class IndexingList extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            return alphabet.length;
+            return alpha.size();
         }
 
         @NotNull
         @Override
         public String getTextToShowInBubble(int pos) {
-            sectionIndexClickListener.onItemClick(pos, alphabet[pos]);
-            setLetterToBold(alphabet[pos]);
-            return alphabet[pos];
+            sectionIndexClickListener.onItemClick(pos, alpha.get(pos));
+            setLetterToBold(alpha.get(pos));
+            return alpha.get(pos);
         }
 
         //VIEW HOLDER
