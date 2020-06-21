@@ -1,12 +1,13 @@
 package com.example.contactlistwithheader
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contactlistwithheader.Model.Contact
 import com.example.contactlistwithheader.adapter.ContactsAdapter
+import com.example.contactlistwithheader.model.Contact
 import com.example.contactlistwithheader.utils.JsonDataFromAsset.Companion.getJsonDataFromAsset
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -14,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-
+    private val items: ArrayList<HashMap<String, String>> = ArrayList()
     private var contactList: MutableList<Contact> = mutableListOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,10 +25,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun retrieveData() {
         val jsonFileString = getJsonDataFromAsset(applicationContext, "data.json")
-
         val gson = Gson()
         val listPersonType = object : TypeToken<List<Contact>>() {}.type
-        val items: ArrayList<HashMap<String, String>> = ArrayList()
+
         val persons: List<Contact> = gson.fromJson(jsonFileString, listPersonType)
         persons.forEachIndexed { _, person ->
             contactList.add(person)
@@ -70,15 +70,37 @@ class MainActivity : AppCompatActivity() {
                 val lastVisibleItemPosition = findLastVisibleItemPosition()
                 val itemsShown = lastVisibleItemPosition - firstVisibleItemPosition + 1
                 //if all items are shown, hide the fast-scroller
-                fastscroll.visibility =
+                fastScroll.visibility =
                     if (adapter.itemCount > itemsShown) View.VISIBLE else View.GONE
             }
         }
-        fastscroll.setRecyclerView(rv)
-        fastscroll.setViewsToUse(
+
+        indexing.onSectionIndexClickListener { i: Int, s: String ->
+
+            (rv!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
+                i,
+                0
+            )
+        }
+
+        //String[] alphabet = {"A", "Y", "Z", "#"};
+        //alphabetik.setAlphabet(alphabet);
+        //alphabetik.setAlphabet(String customAlphabet[]);
+        indexing.onSectionIndexClickListener { i: Int, s: String ->
+            (rv!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
+                i,
+                0
+            )
+        }
+
+        fastScroll.setRecyclerView(indexing)
+        fastScroll.setViewsToUse(
             R.layout.recycler_view_fast_scroller__fast_scroller,
             R.id.fastscroller_bubble,
             R.id.fastscroller_handle
         )
+
+        Log.d("qsdqsd", "qsdqsd" + fastScroll.getTargetPostion())
     }
+
 }

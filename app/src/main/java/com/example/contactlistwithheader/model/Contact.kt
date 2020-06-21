@@ -1,4 +1,4 @@
-package com.example.contactlistwithheader.Model
+package com.example.contactlistwithheader.model
 
 import com.google.gson.annotations.SerializedName
 

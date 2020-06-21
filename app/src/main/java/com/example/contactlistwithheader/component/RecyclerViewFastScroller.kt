@@ -125,6 +125,11 @@ open class RecyclerViewFastScroller : LinearLayout {
         }
     }
 
+    var targetPsoton = 0
+    fun getTargetPostion(): Int {
+        return targetPsoton
+    }
+
     private fun setRecyclerViewPosition(y: Float) {
         if (recyclerView != null) {
             val itemCount = recyclerView!!.adapter!!.itemCount
@@ -132,6 +137,7 @@ open class RecyclerViewFastScroller : LinearLayout {
                 if (handle!!.y == 0f) 0f else if (handle!!.y + handle!!.height >= height - TRACK_SNAP_RANGE) 1f else y / height.toFloat()
             val targetPos =
                 0.getValueInRange(itemCount - 1, (proportion * itemCount.toFloat()).toInt())
+            targetPsoton = targetPos
             (recyclerView!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
                 targetPos,
                 0
