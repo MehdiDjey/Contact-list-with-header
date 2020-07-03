@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contactlistwithheader.adapter.ContactsAdapter
+import com.example.contactlistwithheader.component.IndexingList
 import com.example.contactlistwithheader.model.Contact
 import com.example.contactlistwithheader.utils.JsonDataFromAsset.Companion.getJsonDataFromAsset
 import com.google.gson.Gson
@@ -13,7 +14,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), IndexingList.SectionIndexClickListener {
     private val items: ArrayList<HashMap<String, String>> = ArrayList()
     private var contactList: MutableList<Contact> = mutableListOf()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,21 +59,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupIndexing() {
         val byInitialName = items.groupBy { it["initialName"] }
         val initialNameList = byInitialName.values.toTypedArray()
-        val a: MutableList<String> = mutableListOf()
+        val alphabeticList: MutableList<String> = mutableListOf()
 
-        initialNameList.forEachIndexed { index, list ->
-            a.add(initialNameList[index][0]["initialName"].toString())
+        initialNameList.forEachIndexed { index, _ ->
+            alphabeticList.add(initialNameList[index][0]["initialName"].toString())
         }
 
-        indexing.setAlphabet(a)
+        indexing.setAlphabetic(alphabeticList)
+        indexing.onSectionIndexClickListener(this)
 
-        indexing.onSectionIndexClickListener { i: Int, _: String ->
-
-            (rv_contactsList!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
-                i,
-                0
-            )
-        }
     }
 
     private fun setupFastScroll() {
@@ -96,4 +91,10 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    override fun onItemClick(position: Int, character: String?) {
+        (rv_contactsList.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
+            position,
+            0
+        )
+    }
 }

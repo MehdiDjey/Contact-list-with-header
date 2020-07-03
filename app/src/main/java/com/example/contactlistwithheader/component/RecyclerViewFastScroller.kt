@@ -22,6 +22,7 @@ open class RecyclerViewFastScroller : LinearLayout {
     private var handle: View? = null
     private var recyclerView: RecyclerView? = null
     private var heights = 0
+    private var targetPosition = 0
     private val onScrollListener: RecyclerView.OnScrollListener =
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(
@@ -125,10 +126,6 @@ open class RecyclerViewFastScroller : LinearLayout {
         }
     }
 
-    var targetPsoton = 0
-    fun getTargetPostion(): Int {
-        return targetPsoton
-    }
 
     private fun setRecyclerViewPosition(y: Float) {
         if (recyclerView != null) {
@@ -137,7 +134,7 @@ open class RecyclerViewFastScroller : LinearLayout {
                 if (handle!!.y == 0f) 0f else if (handle!!.y + handle!!.height >= height - TRACK_SNAP_RANGE) 1f else y / height.toFloat()
             val targetPos =
                 0.getValueInRange(itemCount - 1, (proportion * itemCount.toFloat()).toInt())
-            targetPsoton = targetPos
+            targetPosition = targetPos
             (recyclerView!!.layoutManager as LinearLayoutManager?)!!.scrollToPositionWithOffset(
                 targetPos,
                 0
